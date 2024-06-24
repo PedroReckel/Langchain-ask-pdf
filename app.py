@@ -15,14 +15,12 @@ from io import BytesIO
 app = Flask(__name__)
 load_dotenv()
 
-# Carregar variáveis de ambiente
 FILE_SERVER_URL = os.getenv('FILE_SERVER_URL')
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_REGION = os.getenv('AWS_REGION')
 S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
 
-# Configurar boto3
 s3_client = boto3.client(
     's3',
     aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -67,7 +65,7 @@ def ask_pdf():
             text = extract_text_from_pdf(pdf_content)
             all_text += text + "\n"
         
-        # Dividir o texto em chunks
+        # Dividir o texto em pedacos
         text_splitter = CharacterTextSplitter(
             separator="\n",
             chunk_size=1000,
@@ -76,15 +74,12 @@ def ask_pdf():
         )
         chunks = text_splitter.split_text(all_text)
         
-        # Criar embeddings
         embeddings = OpenAIEmbeddings()
         knowledge_base = FAISS.from_texts(chunks, embeddings)
         
-        # Adicionar instrução personalizada
-        instruction = "Você é o Atendimentoel, uma IA especializada nos serviços da empresa EL Produções de Software. Com base nas perguntas que forem feitas, você irá responder com base nos PDFs disponíveis."
+        instruction = "Você é o , uma IA especializada nos serviços da empresa. Com base nas perguntas que forem feitas, você irá responder com base nos PDFs disponíveis."
         prompt = f"{instruction}\n\n{user_question}"
         
-        # Fazer a pergunta
         docs = knowledge_base.similarity_search(prompt)
         llm = OpenAI()
         chain = load_qa_chain(llm, chain_type="stuff")
